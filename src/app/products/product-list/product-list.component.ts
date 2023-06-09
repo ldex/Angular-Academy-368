@@ -6,6 +6,7 @@ import { Observable, EMPTY, combineLatest, Subscription, tap, catchError, startW
 import { Product } from '../product.interface';
 import { ProductService } from '../../services/product.service';
 import { FavouriteService } from '../../services/favourite.service';
+import { LoadingService } from 'src/app/services/loading.service';
 
 @Component({
   selector: 'app-product-list',

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, delay, shareReplay, tap, first, map, mergeAll, BehaviorSubject, switchMap, of, filter } from 'rxjs';
 import { Product } from '../products/product.interface';
+import { LoadingService } from './loading.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,9 @@ export class ProductService {
   private baseUrl = 'https://storerestservice.azurewebsites.net/api/products/';
   products$: Observable<Product[]>;
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private loadingService: LoadingService) {
     this.initProducts();
   }
 
@@ -26,6 +29,8 @@ export class ProductService {
                       //  tap(console.table),
                         shareReplay()
                       );
+
+      this.loadingService.showLoaderUntilCompleted(this.products$);
   }
 
   insertProduct(newProduct: Product): Observable<Product> {
