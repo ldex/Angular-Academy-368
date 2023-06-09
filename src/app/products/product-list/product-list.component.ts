@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl } from '@angular/forms';
 import { Observable, EMPTY, combineLatest, Subscription, tap, catchError, startWith, count, map, debounceTime, filter, distinctUntilChanged } from 'rxjs';
@@ -12,7 +12,7 @@ import { FavouriteService } from '../../services/favourite.service';
   templateUrl: './product-list.component.html',
   styleUrls: ['./product-list.component.css']
 })
-export class ProductListComponent implements OnInit {
+export class ProductListComponent implements OnInit, OnDestroy {
 
   title: string = 'Products';
   selectedProduct: Product;
@@ -24,7 +24,10 @@ export class ProductListComponent implements OnInit {
   filteredProducts$: Observable<Product[]>;
 
   filter: FormControl = new FormControl("");
+  favouriteAdded: Product;
   errorMessage;
+
+  sub: Subscription = new Subscription();
 
   constructor(
     private productService: ProductService,
@@ -32,7 +35,23 @@ export class ProductListComponent implements OnInit {
     private router: Router) {
   }
 
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
+  }
+
   ngOnInit(): void {
+    this.sub.add(
+        this
+          .favouriteService
+          .favouriteAdded$
+          .pipe(
+            tap(product => console.log('Product added to favourites. ' + product?.name))
+          )
+          .subscribe(
+            product => this.favouriteAdded = product
+          )
+    )
+
     this.products$ = this
                       .productService
                       .products$;
