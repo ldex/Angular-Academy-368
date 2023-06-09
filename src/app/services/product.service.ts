@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, delay, shareReplay, tap, first, map, mergeAll, BehaviorSubject, switchMap, of, filter } from 'rxjs';
+import { Observable, catchError, delay, shareReplay, tap, first, map, mergeAll, BehaviorSubject, switchMap, of, filter, retry } from 'rxjs';
 import { Product } from '../products/product.interface';
 import { LoadingService } from './loading.service';
 
@@ -27,7 +27,8 @@ export class ProductService {
                       .pipe(
                         delay(1500), // for demo!
                       //  tap(console.table),
-                        shareReplay()
+                        shareReplay(),
+                        retry({count: 3, delay: 500})
                       );
 
       this.loadingService.showLoaderUntilCompleted(this.products$);

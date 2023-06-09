@@ -7,6 +7,7 @@ import { Product } from '../product.interface';
 import { ProductService } from '../../services/product.service';
 import { FavouriteService } from '../../services/favourite.service';
 import { LoadingService } from 'src/app/services/loading.service';
+import { log, logWithPrefix } from 'src/app/log.operator';
 
 @Component({
   selector: 'app-product-list',
@@ -26,7 +27,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   filter: FormControl = new FormControl("");
   favouriteAdded: Product;
-  errorMessage;
+  errorMessage: string;
 
   sub: Subscription = new Subscription();
 
@@ -55,7 +56,15 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
     this.products$ = this
                       .productService
-                      .products$;
+                      .products$
+                      .pipe(
+                        catchError(
+                          err => {
+                            this.errorMessage = err.message;
+                            return EMPTY;
+                          }
+                        )
+                      );
 
     this.filter$ =
                 this
@@ -67,7 +76,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
                     debounceTime(500),
                     distinctUntilChanged(),
                     startWith(""),
-                    tap(text => this.resetPagination())
+                    logWithPrefix('new filter text: '),
+                    tap(text => this.resetPagination()),
                   );
 
       this.filtered$ = this

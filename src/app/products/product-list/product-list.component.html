@@ -2,6 +2,10 @@
     {{ title }}
 </h2>
 
+<h3 *ngIf="errorMessage" class="errorMessage">
+    {{ errorMessage }}
+</h3>
+
 <h3 *ngIf="favouriteAdded">
     Product {{ favouriteAdded.name }} added to your favourites!
 </h3>
