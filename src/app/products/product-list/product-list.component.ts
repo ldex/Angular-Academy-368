@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl } from '@angular/forms';
-import { Observable, EMPTY, combineLatest, Subscription, tap, catchError, startWith, count, map, debounceTime, filter } from 'rxjs';
+import { Observable, EMPTY, combineLatest, Subscription, tap, catchError, startWith, count, map, debounceTime, filter, distinctUntilChanged } from 'rxjs';
 
 import { Product } from '../product.interface';
 import { ProductService } from '../../services/product.service';
@@ -16,7 +16,14 @@ export class ProductListComponent implements OnInit {
 
   title: string = 'Products';
   selectedProduct: Product;
+
   products$: Observable<Product[]>;
+  productsNumber$: Observable<number>;
+  filter$: Observable<string>;
+  filtered$: Observable<Boolean>;
+  filteredProducts$: Observable<Product[]>;
+
+  filter: FormControl = new FormControl("");
   errorMessage;
 
   constructor(
@@ -29,6 +36,41 @@ export class ProductListComponent implements OnInit {
     this.products$ = this
                       .productService
                       .products$;
+
+    this.filter$ =
+                this
+                  .filter
+                  .valueChanges
+                  .pipe(
+                    map(text => text.trim()),
+                    filter(text => text == '' || text.length > 2),
+                    debounceTime(500),
+                    distinctUntilChanged(),
+                    startWith(""),
+                    tap(text => console.log(text))
+                  );
+
+      this.filtered$ = this
+                        .filter$
+                        .pipe(
+                          map(text => text.length > 0)
+                        )
+
+      this.filteredProducts$ = combineLatest([this.products$, this.filter$])
+        .pipe(
+          map(([products, filterString]) =>
+            products.filter(product =>
+              product.name.toLowerCase().includes(filterString.toLowerCase())
+            )
+          )
+        )
+
+    this.productsNumber$ = this
+        .filteredProducts$
+        .pipe(
+          map(products => products.length),
+          startWith(0)
+        );
   }
 
   get favourites(): number {

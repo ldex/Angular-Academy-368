@@ -22,8 +22,9 @@ export class ProductService {
                       .http
                       .get<Product[]>(url)
                       .pipe(
-                        delay(1500),
-                        tap(console.table)
+                        delay(1500), // for demo!
+                      //  tap(console.table),
+                        shareReplay()
                       );
   }
 
