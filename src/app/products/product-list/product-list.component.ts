@@ -47,7 +47,7 @@ export class ProductListComponent implements OnInit {
                     debounceTime(500),
                     distinctUntilChanged(),
                     startWith(""),
-                    tap(text => console.log(text))
+                    tap(text => this.resetPagination())
                   );
 
       this.filtered$ = this
